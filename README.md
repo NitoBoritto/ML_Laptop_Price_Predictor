@@ -40,7 +40,7 @@ flowchart TD
     D -->|K-Means| E["Market Tier Segmentation"]
     C --> F["Custom Transformers"]
     F -->|Cardinality Reduction| G["Encoded Features"]
-    G --> H["Model Training (XGBoost/LGBM/RF)"]
+    E & G --> H["Model Training (XGBoost/LGBM/RF)"]
     H --> I["Statistical Validation"]
     I --> J["Streamlit Dashboard"]
     J --> K["Real-Time Price Inference"]
@@ -62,7 +62,7 @@ flowchart TD
 
 ## 📊 Dataset Description
 
-The dataset comprises technical specifications and market prices for over 1,300 distinct laptop configurations.
+The dataset comprises technical specifications and market prices for over 1,200 distinct laptop configurations.
 
 **Target Variable:** `Price` (EUR/USD)
 
@@ -75,17 +75,17 @@ The dataset comprises technical specifications and market prices for over 1,300 
 
 | Column | Non-Null Count | Dtype | Description |
 | --- | --- | --- | --- |
-| `Company` | 1303 | object | Manufacturer (Dell, Apple, Lenovo, etc.) |
-| `TypeName` | 1303 | object | Form factor (Ultrabook, Gaming, etc.) |
-| `Inches` | 1303 | float64 | Screen size diagonal |
-| `ScreenResolution` | 1303 | object | Raw resolution string (parsed in pipeline) |
-| `Cpu` | 1303 | object | Processor details |
-| `Ram` | 1303 | int32 | Memory in GB |
-| `Memory` | 1303 | object | Storage details (e.g., "128GB SSD + 1TB HDD") |
-| `Gpu` | 1303 | object | Graphics card details |
-| `OpSys` | 1303 | object | Operating System |
-| `Weight` | 1303 | float64 | Weight in kg |
-| `Price` | 1303 | float64 | **Target Variable** |
+| `Company` | 1275 | object | Manufacturer (Dell, Apple, Lenovo, etc.) |
+| `TypeName` | 1275 | object | Form factor (Ultrabook, Gaming, etc.) |
+| `Inches` | 1275 | float64 | Screen size diagonal |
+| `ScreenResolution` | 1275 | object | Raw resolution string (parsed in pipeline) |
+| `Cpu` | 1275 | object | Processor details |
+| `Ram` | 1275 | int32 | Memory in GB |
+| `Memory` | 1275 | object | Storage details (e.g., "128GB SSD + 1TB HDD") |
+| `Gpu` | 1275 | object | Graphics card details |
+| `OpSys` | 1275 | object | Operating System |
+| `Weight` | 1275 | float64 | Weight in kg |
+| `Price` | 1275 | float64 | **Target Variable** |
 
 ---
 
@@ -99,7 +99,7 @@ Comprehensive analysis was performed to understand the drivers of laptop pricing
 2. **Market Segmentation:** Clustering revealed distinct pricing tiers that standard categorical features (like "Brand") failed to capture.
 3. **Non-Linearity:** Price distributions are heavily right-skewed, necessitating log-transformations for linear stability.
 
-*(Note: Replace the link above with your actual screenshot of the Feature Importance plot)*
+> **Insight:** RAM showed a nearly linear correlation with price in the "Premium" cluster, while storage type (SSD vs HDD) was the primary separator in the "Budget" cluster.
 
 ---
 
