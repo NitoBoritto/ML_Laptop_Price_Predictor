@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import os
 import pandas as pd
@@ -91,7 +89,7 @@ def load_comparison():
     path = os.path.join("models", "comparison.joblib")
     if os.path.exists(path):
         return joblib.load(path)
-    return pd.DataFrame(columns=["Model", "  R2", " MAE", "RMSE"])
+    return pd.DataFrame(columns=["Model", "  R2", " MAE", "RMSE"]) 
 
 comparison = load_comparison()
 
@@ -167,6 +165,104 @@ with st.sidebar:
         st.warning(f"No metrics found for model: {selected_model_name}")
 
 # ── Input Form ──
+st.markdown("### :wrench: Configure Laptop Specifications")
+
+st.markdown("### :bar_chart: Feature Importance")
+try:
+    selected_pipe = models[selected_model_name]
+    feature_names = None
+    importances = None
+    # XGBoost, Random Forest, LightGBM, Elastic Net, Linear Regression
+    if hasattr(selected_pipe, 'named_steps'):
+        # Try XGBoost style
+        if 'model' in selected_pipe.named_steps:
+            model_step = selected_pipe.named_steps['model']
+            # XGBoost
+            if hasattr(model_step, 'regressor_') and hasattr(model_step.regressor_, 'feature_importances_'):
+                xgb_core = model_step.regressor_
+                if 'encoding_scaling' in selected_pipe.named_steps:
+                    coltrans = selected_pipe.named_steps['encoding_scaling']
+                    if 'cluster' in selected_pipe.named_steps:
+                        cluster = selected_pipe.named_steps['cluster']
+                        feature_names = cluster.get_feature_names_out(coltrans.get_feature_names_out())
+                        importances = xgb_core.feature_importances_
+            # Random Forest, LightGBM, etc.
+            elif hasattr(model_step, 'feature_importances_'):
+                importances = model_step.feature_importances_
+                if 'encoding_scaling' in selected_pipe.named_steps:
+                    coltrans = selected_pipe.named_steps['encoding_scaling']
+                    feature_names = coltrans.get_feature_names_out()
+        # Linear models
+        elif 'regressor' in selected_pipe.named_steps:
+            reg = selected_pipe.named_steps['regressor']
+            if hasattr(reg, 'coef_'):
+                importances = np.abs(reg.coef_)
+                if 'encoding_scaling' in selected_pipe.named_steps:
+                    coltrans = selected_pipe.named_steps['encoding_scaling']
+                    feature_names = coltrans.get_feature_names_out()
+    if feature_names is not None and importances is not None:
+        # Clean feature names for display
+        def clean_feature_name(name):
+            return (name.replace('robust_', '')
+                        .replace('std_', '')
+                        .replace('ohe_', '')
+                        .replace('minmax_', '')
+                        .replace('scaler_', '')
+                        .replace('encoder_', '')
+                        .replace('cluster_', '')
+                        .replace('remainder_', '')
+                        .replace('passthrough_', '')
+                        .replace('label_', '')
+                        .replace('freq_', '')
+                        .replace('ordinal_', '')
+                        .replace('target_', '')
+                        .replace('binary_', '')
+                        .replace('onehot_', '')
+                        .replace('normalize_', '')
+                        .replace('normalize', '')
+                        .replace('scaler', '')
+                        .replace('encoder', '')
+                        .replace('cluster', '')
+                        .replace('passthrough', '')
+                        .replace('label', '')
+                        .replace('freq', '')
+                        .replace('ordinal', '')
+                        .replace('target', '')
+                        .replace('binary', '')
+                        .replace('onehot', '')
+                        .replace('_', ' ')
+                        .strip())
+        feature_importance = pd.DataFrame({
+            "feature": [clean_feature_name(f) for f in feature_names],
+            "importance": importances
+        }).sort_values(by="importance", ascending=False)
+        feature_importance = feature_importance.reset_index(drop=True)
+        fig_feat = px.bar(
+            feature_importance,
+            x="importance",
+            y="feature",
+            orientation="h",
+            color="importance",
+            color_continuous_scale="Viridis",
+            labels={"importance": "Importance", "feature": "Feature"},
+            height=400
+        )
+        fig_feat.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#ccccee"),
+            margin=dict(l=40, r=20, t=20, b=40),
+            xaxis=dict(gridcolor="#2a2a5a"),
+            yaxis=dict(gridcolor="#2a2a5a")
+        )
+        fig_feat.update_yaxes(autorange="reversed")
+        st.plotly_chart(fig_feat, use_container_width=True)
+    else:
+        st.info("Feature importance not available for this model.")
+except Exception as e:
+    st.warning(f"Could not display feature importance: {str(e)}")
+
 st.markdown("### :wrench: Configure Laptop Specifications")
 
 
