@@ -1,10 +1,13 @@
+
 import streamlit as st
 import os
+import sys
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import joblib
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # Import robust extractors for CPU/GPU series
 from custom_transformers import CPUSeriesExtractor, GPUSeriesExtractor
 
