@@ -126,7 +126,7 @@ st.markdown("""
     💻 Laptop Price Predictor
     </h1>
     <p style='color: #bbbbbb; font-size: 1.1rem;'>
-    Machine Learning powered price estimation across 1,300+ laptops
+    Machine Learning powered price estimation across 1,200+ laptops
     </p>
 </div>
 """, unsafe_allow_html=True)

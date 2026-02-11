@@ -26,20 +26,20 @@ st.markdown("""
     div[data-testid="stMetric"] { background: linear-gradient(135deg, #232323, #444444); border: 1px solid #555555; border-radius: 12px; padding: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); transition: box-shadow 0.2s, transform 0.2s; }
     div[data-testid="stMetric"]:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.5); transform: translateY(-4px) scale(1.03); z-index: 2; }
     div[data-testid="stMetric"]:active { box-shadow: 0 2px 8px rgba(0,0,0,0.2); transform: translateY(1px) scale(0.98); }
-    div[data-testid="stMetric"] label { color: #bbbbbb !important; font-size: 0.85rem !important; }
+    div[data-testid="stMetric"] label { color: #ffffff !important; font-size: 0.85rem !important; }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #ffffff !important; font-size: 1.8rem !important; }
     button[data-testid="baseButton"] { background: #222222 !important; color: #ffffff !important; border: 1px solid #555555 !important; transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s, transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
     button[data-testid="baseButton"]:hover { background: #444444 !important; color: #ffffff !important; border: 1px solid #bbbbbb !important; cursor: pointer; box-shadow: 0 8px 32px rgba(0,0,0,0.25); transform: translateY(-2px) scale(1.04); }
     button[data-testid="baseButton"]:active { background: #bbbbbb !important; color: #222222 !important; border: 1px solid #bbbbbb !important; box-shadow: 0 2px 8px rgba(0,0,0,0.10); transform: translateY(1px) scale(0.97); }
-    h1, h2, h3 { color: #ffffff !important; }
+    h1, h2, h3, label, .stApp, .stApp p, .stApp span, .stApp div, .stApp label, .stApp li, .stApp ul, .stApp ol, .stApp td, .stApp th { color: #ffffff !important; }
     hr { border-color: #555555 !important; }
     section[data-testid="stSidebar"] { background: linear-gradient(180deg, #222222, #181818); border-right: 1px solid #555555; }
-    section[data-testid="stSidebar"] .stMarkdown p, section[data-testid="stSidebar"] label { color: #bbbbbb !important; }
+    section[data-testid="stSidebar"] .stMarkdown p, section[data-testid="stSidebar"] label { color: #ffffff !important; }
     .prediction-card { background: linear-gradient(135deg, #232323, #444444); border: 2px solid #888888; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); margin: 1rem 0; transition: box-shadow 0.2s, transform 0.2s; }
     .prediction-card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.6); transform: translateY(-6px) scale(1.04); z-index: 2; }
     .prediction-card:active { box-shadow: 0 2px 8px rgba(0,0,0,0.15); transform: translateY(2px) scale(0.97); }
     .prediction-price { font-size: 3.5rem; font-weight: bold; background: linear-gradient(90deg, #ffffff, #bbbbbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .prediction-label { color: #bbbbbb; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .prediction-label { color: #ffffff !important; font-size: 1.1rem; margin-bottom: 0.5rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -206,45 +206,44 @@ try:
             return (name.replace('robust_', '')
                         .replace('std_', '')
                         .replace('ohe_', '')
-                        .replace('minmax_', '')
-                        .replace('scaler_', '')
-                        .replace('encoder_', '')
-                        .replace('cluster_', '')
-                        .replace('remainder_', '')
-                        .replace('passthrough_', '')
-                        .replace('label_', '')
-                        .replace('freq_', '')
-                        .replace('ordinal_', '')
-                        .replace('target_', '')
                         .replace('binary_', '')
-                        .replace('onehot_', '')
-                        .replace('normalize_', '')
-                        .replace('normalize', '')
-                        .replace('scaler', '')
-                        .replace('encoder', '')
-                        .replace('cluster', '')
-                        .replace('passthrough', '')
-                        .replace('label', '')
-                        .replace('freq', '')
-                        .replace('ordinal', '')
-                        .replace('target', '')
-                        .replace('binary', '')
-                        .replace('onehot', '')
                         .replace('_', ' ')
                         .strip())
+        # Group encoded columns by their original feature and average their importances
+        cleaned_features = [clean_feature_name(f) for f in feature_names]
         feature_importance = pd.DataFrame({
-            "feature": [clean_feature_name(f) for f in feature_names],
+            "feature": cleaned_features,
             "importance": importances
-        }).sort_values(by="importance", ascending=False)
-        feature_importance = feature_importance.reset_index(drop=True)
+        })
+        # Group by the base feature name (before first space or by splitting on space and taking the first part)
+        def get_base_feature(name):
+            # For features like "PrimaryStorage SSD", "PrimaryStorage HDD", etc.
+            # Take the first word or up to the first space, or join until a number is found
+            # If the feature name contains a space, take the part before the first space
+            # But for features like "CPU freq" or "Screen Size", keep both words
+            # We'll use a list of known multi-word features to avoid over-collapsing
+            multi_word_features = [
+                "Screen Size", "CPU freq", "Primary Storage", "Secondary Storage", "GPU company", "CPU company", "CPU series", "GPU series", "Retina Display", "IPS Panel", "Operating System", "Laptop Type"
+            ]
+            for mw in multi_word_features:
+                if name.lower().startswith(mw.lower()):
+                    return mw
+            # Otherwise, take the first word
+            return name.split()[0]
+
+        feature_importance["base_feature"] = feature_importance["feature"].apply(get_base_feature)
+        # Remove features containing 'te' (case-insensitive)
+        filtered_importance = feature_importance[~feature_importance["base_feature"].str.lower().str.contains("te")]
+        grouped_importance = filtered_importance.groupby("base_feature", as_index=False)["importance"].mean()
+        grouped_importance = grouped_importance.sort_values(by="importance", ascending=False).reset_index(drop=True)
         fig_feat = px.bar(
-            feature_importance,
+            grouped_importance,
             x="importance",
-            y="feature",
+            y="base_feature",
             orientation="h",
             color="importance",
             color_continuous_scale="Viridis",
-            labels={"importance": "Importance", "feature": "Feature"},
+            labels={"importance": "Importance", "base_feature": "Feature"},
             height=400
         )
         fig_feat.update_layout(
