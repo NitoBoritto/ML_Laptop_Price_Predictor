@@ -71,7 +71,9 @@ df = GPUSeriesExtractor().fit_transform(df)
 # ── Model Loading ──
 @st.cache_resource
 def load_models():
-    model_dir = "models"
+    # Use absolute path to the models folder
+    model_dir = os.path.join(root_path, "models")
+    
     model_files = [
         ("XGBoost", "xgboost_pipe.joblib"),
         ("LightGBM", "lightgbm_pipe.joblib"),
@@ -79,12 +81,13 @@ def load_models():
         ("Elastic Net", "elastic_net_pipe.joblib"),
         ("Linear Regression", "linear_regression_pipe.joblib")
     ]
-    models = {}
+    
+    loaded_models = {}
     for name, fname in model_files:
         path = os.path.join(model_dir, fname)
         if os.path.exists(path):
-            models[name] = joblib.load(path)
-    return models
+            loaded_models[name] = joblib.load(path) # Should now find CardinalityReducer
+    return loaded_models
 
 models = load_models()
 
