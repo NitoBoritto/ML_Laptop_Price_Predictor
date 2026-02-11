@@ -107,7 +107,7 @@ Comprehensive analysis was performed to understand the drivers of laptop pricing
 
 To ensure a robust and leak-free workflow, I implemented custom Scikit-Learn transformers:
 
-* **`CardinalityReducer`:** Automatically groups infrequent categorical levels (e.g., obscure GPU brands) into an "Other" category to prevent overfitting.
+* **`CardinalityReducer` Custom Transformer:** Automatically groups infrequent categorical levels (e.g., obscure GPU brands) into an "Other" category to prevent overfitting.
 * **Feature Extraction:** Parsed complex string columns (Screen Resolution, CPU) into numerical features like `PPI` (Pixels Per Inch) and `CPU_Freq`.
 * **Target Encoding:** Applied to high-cardinality features where One-Hot Encoding would create too much sparsity.
 
@@ -139,8 +139,6 @@ Visualizes the dataset, showing price distributions across different brands, typ
 
 A real-time inference interface where users can configure a laptop's specs and receive an instant price valuation with confidence intervals.
 
-*(Note: Replace the link above with a screenshot of your dashboard)*
-
 ---
 
 ## ⚙️ Technical Challenges & Solutions
@@ -154,14 +152,6 @@ A real-time inference interface where users can configure a laptop's specs and r
 * *Solution:* Curated a specific `requirements.txt` with pinned versions for stable cloud deployment.
 
 
-
----
-
-## 🤝 Mentorship & Acknowledgments
-
-This project was developed as part of the **PathLine Training Academy** Data Science program.
-
-A massive shoutout to **Adel Sobhy** for his mentorship, technical guidance, and for fostering a production-first mindset throughout the development lifecycle.
 
 ---
 
