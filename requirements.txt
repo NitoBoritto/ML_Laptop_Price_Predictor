@@ -8,3 +8,4 @@ joblib
 statsmodels
 scipy
 seaborn
+lightgbm
