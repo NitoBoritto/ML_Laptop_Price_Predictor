@@ -157,8 +157,8 @@ A real-time inference interface where users can configure a laptop's specs and r
 
 ## 🔗 Links & Usage
 
-* **Live App:** [Streamlit Dashboard](https://www.google.com/url?sa=E&source=gmail&q=https://nitolaptoppricepredictor.streamlit.app/)
-* **Kaggle Notebook:** [View Analysis on Kaggle](https://www.google.com/search?q=YOUR_KAGGLE_LINK_HERE)
+* **Live App:** [Streamlit Dashboard](https://nitolaptoppredictor.streamlit.app/)
+* **Kaggle Notebook:** [View Analysis on Kaggle](https://www.kaggle.com/code/ahmedemasha/ml-price-predictor)
 
 ### Local Installation
 
